@@ -33,3 +33,16 @@ ln -s /etc/letsencrypt/live/<domainname>/fullchain.pem /clouddata/server/nginx/s
 ln -s /etc/letsencrypt/live/<domainname>/privkey.pem /clouddata/server/nginx/ssl/domain.key
 '''
 
+Unfortunately the NAT field cannot input hostname for now, but you can refer to below work-around:
+
+```
+cd /clouddata/server/mysql/bin
+./mysql -uroot -padmin               // Access database
+ALTER TABLE `ursalink_myacs`.`tbl_acs_ssh_tunnel_port` MODIFY COLUMN `ip` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL FIRST;
+ALTER TABLE `ursalink_myacs`.`tbl_acs_ssh_tunnel` MODIFY COLUMN `ip` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'server ssh IP address' AFTER `id`;
+ALTER TABLE `ursalink_myacs`.`tbl_acs_config` MODIFY COLUMN `server_ip` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL FIRST;
+quit;                                          // Leave database
+vi /clouddata/www/cloud_management/application/views/general.php
+
+```
+Delete data-type="ip" and change maxlength to 128
